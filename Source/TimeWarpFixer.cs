@@ -8,12 +8,9 @@ namespace RealSolarSystem
         public double lastTime = 0;
         public double currentTime = 0;
         public static bool fixedTimeWarp = false;
-        protected bool isCompatible = true;
 
         public void Start()
         {
-            if (!CompatibilityChecker.IsCompatible())
-                isCompatible = false;
             fixedTimeWarp = false;
 
             GameSettings.KERBIN_TIME = false;
@@ -22,26 +19,28 @@ namespace RealSolarSystem
 
         public void Update()
         {
-            if (!isCompatible)
-                return;
+            // Update the TimeWarp rates.
 
-            // Fix Timewarp
             if (!fixedTimeWarp && TimeWarp.fetch != null)
             {
                 fixedTimeWarp = true;
                 ConfigNode twNode = null;
+
                 foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("REALSOLARSYSTEM"))
                     twNode = node.GetNode("timeWarpRates");
-                float ftmp;
+
+                Debug.Log("[RealSolarSystem] Setting TimeWarp rates...");
+
                 if (twNode != null)
                 {
                     for (int i = 1; i < 8; i++)
                     {
                         if (twNode.HasValue("rate" + i))
-                            if (float.TryParse(twNode.GetValue("rate" + i), out ftmp))
+                            if (float.TryParse(twNode.GetValue("rate" + i), out float ftmp))
                                 TimeWarp.fetch.warpRates[i] = ftmp;
                     }
                 }
+
                 Destroy(this);
             }
         }
